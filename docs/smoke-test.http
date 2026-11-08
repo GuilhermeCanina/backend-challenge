@@ -1,0 +1,75 @@
+@baseUrl = http://localhost:3000
+@playerId = 0192f28f-5dc0-7d58-bdb2-814ad6a0f4a1
+@walletId = replace-with-wallet-id-from-create-response
+
+### Liveness
+GET {{baseUrl}}/health/live
+
+### Readiness (requires PostgreSQL and LocalStack SQS)
+GET {{baseUrl}}/health/ready
+
+### Create wallet: should return 201, balance 100.00, version 1
+POST {{baseUrl}}/wallets
+Content-Type: application/json
+
+{
+  "playerId": "{{playerId}}",
+  "initialBalance": { "amount": "100.00", "currency": "BRL" }
+}
+
+### BET: should return 200, balance 75.00
+POST {{baseUrl}}/wagering/transactions
+Idempotency-Key: smoke:bet-001
+Content-Type: application/json
+
+{
+  "providerId": "smoke-provider",
+  "externalTransactionId": "bet-001",
+  "playerId": "{{playerId}}",
+  "walletId": "{{walletId}}",
+  "roundId": "round-001",
+  "gameId": "smoke-game",
+  "kind": "BET",
+  "money": { "amount": "25.00", "currency": "BRL" }
+}
+
+### Exact replay: same transactionId and original balance 75.00; idempotentReplay true
+POST {{baseUrl}}/wagering/transactions
+Idempotency-Key: smoke:bet-001
+Content-Type: application/json
+
+{
+  "providerId": "smoke-provider",
+  "externalTransactionId": "bet-001",
+  "playerId": "{{playerId}}",
+  "walletId": "{{walletId}}",
+  "roundId": "round-001",
+  "gameId": "smoke-game",
+  "kind": "BET",
+  "money": { "amount": "25.00", "currency": "BRL" }
+}
+
+### Same key, different payload: should return 409
+POST {{baseUrl}}/wagering/transactions
+Idempotency-Key: smoke:bet-001
+Content-Type: application/json
+
+{
+  "providerId": "smoke-provider",
+  "externalTransactionId": "bet-001",
+  "playerId": "{{playerId}}",
+  "walletId": "{{walletId}}",
+  "roundId": "round-001",
+  "gameId": "smoke-game",
+  "kind": "BET",
+  "money": { "amount": "30.00", "currency": "BRL" }
+}
+
+### Wallet query
+GET {{baseUrl}}/wallets/{{walletId}}
+
+### Ledger query
+GET {{baseUrl}}/wallets/{{walletId}}/ledger?limit=50
+
+### Reconciliation: consistent should be true
+POST {{baseUrl}}/wallets/{{walletId}}/reconciliation

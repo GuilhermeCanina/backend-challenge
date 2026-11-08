@@ -1,0 +1,51 @@
+{
+  "name": "distributed-wagering-processor",
+  "version": "0.4.2",
+  "private": true,
+  "description": "Distributed financial transaction processor for the Jungle Gaming technical challenge",
+  "scripts": {
+    "dev": "bun --watch src/main.ts",
+    "start": "bun src/main.ts",
+    "build": "nest build",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "test:unit": "bun test tests/unit",
+    "test:sqs": "bash scripts/sqs-consumer-smoke.sh",
+    "test:outbox": "bash scripts/outbox-publisher-smoke.sh",
+    "db:migrate": "mikro-orm migration:up",
+    "db:rollback": "mikro-orm migration:down",
+    "db:pending": "mikro-orm migration:pending",
+    "validate": "bun run typecheck && bun test && bun run build",
+    "test:pending-reference": "bash scripts/pending-reference-smoke.sh"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.900.0",
+    "@mikro-orm/core": "^7.2.7",
+    "@mikro-orm/decorators": "^7.2.7",
+    "@mikro-orm/migrations": "^7.2.7",
+    "@mikro-orm/nestjs": "^7.0.1",
+    "@mikro-orm/postgresql": "^7.2.7",
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^4.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "decimal.js": "^10.5.0",
+    "dotenv": "^16.4.7",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "tinyglobby": "^0.2.14"
+  },
+  "devDependencies": {
+    "@mikro-orm/cli": "^7.2.7",
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/schematics": "^11.0.0",
+    "@types/bun": "^1.2.0",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.0"
+  },
+  "type": "module"
+}

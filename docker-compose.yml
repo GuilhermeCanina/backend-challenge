@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: wagering-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: wagering
+      POSTGRES_USER: wagering
+      POSTGRES_PASSWORD: wagering_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wagering -d wagering"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  localstack:
+    image: localstack/localstack:4
+    container_name: wagering-localstack
+    restart: unless-stopped
+    environment:
+      SERVICES: sqs
+      DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    ports:
+      - "4566:4566"
+    volumes:
+      - ./.localstack/init/ready.d:/etc/localstack/init/ready.d:ro
+    healthcheck:
+      test: ["CMD", "bash", "-c", "awslocal sqs list-queues >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  postgres_data:
